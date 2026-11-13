@@ -35,7 +35,9 @@
         <h2>Contact Me</h2>
         <p>I'd really like to hear from you</p>
 
-        <form action="https://formspree.io/f/myewzbad" method="post">
+        <form name="contact" method="POST" data-netlify="true">
+          <!--prettier-ignore-->
+          <input type="hidden" name="form-name" value="contact">
           <fieldset>
             <legend>Personal Info</legend>
             <p>
