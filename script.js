@@ -1,157 +1,109 @@
-// COS 106 - Term Project - script.js
+// Portfolio - script.js - Oluwalore Matthew
+// Websites for Restaurants in USA, UK & Canada
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ===== ACADEMIC PLANNER - Arrays and Functions =====
-  // Array to store tasks
-  let tasks = [];
-
-  const taskInput = document.getElementById("taskInput");
-  const addTaskBtn = document.getElementById("addTaskBtn");
-  const taskList = document.getElementById("taskList");
-  const taskCount = document.getElementById("taskCount");
-
-  // Function to show tasks on the page - DOM Manipulation + Dynamic Content
-  function renderTasks() {
-    if (!taskList) return;
-    taskList.innerHTML = "";
-
-    tasks.forEach((task, index) => {
-      const li = document.createElement("li");
-      li.textContent = task.text;
-      if (task.completed) {
-        li.style.textDecoration = "line-through";
-        li.style.opacity = "0.6";
-      }
-
-      // Complete Button - Event Handling
-      const completeBtn = document.createElement("button");
-      completeBtn.textContent = task.completed ? "Undo" : "Done";
-      completeBtn.type = "button";
-      completeBtn.style.marginLeft = "1rem";
-      completeBtn.addEventListener("click", () => {
-        tasks[index].completed = !tasks[index].completed;
-        renderTasks();
-      });
-
-      // Delete Button - Event Handling
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "Delete";
-      deleteBtn.type = "button";
-      deleteBtn.style.marginLeft = "0.5rem";
-      deleteBtn.addEventListener("click", () => {
-        tasks.splice(index, 1);
-        renderTasks();
-      });
-
-      li.appendChild(completeBtn);
-      li.appendChild(deleteBtn);
-      taskList.appendChild(li);
-    });
-
-    if (taskCount) {
-      taskCount.textContent = "Total tasks: " + tasks.length;
-    }
-  }
-
-  // Add Task - Event Handling
-  if (addTaskBtn && taskInput) {
-    addTaskBtn.addEventListener("click", () => {
-      const text = taskInput.value.trim();
-      if (text === "") {
-        alert("Please type a task before you add.");
-        return;
-      }
-      tasks.push({ text: text, completed: false });
-      taskInput.value = "";
-      renderTasks();
-    });
-
-    // Also add when you press Enter
-    taskInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        addTaskBtn.click();
-      }
-    });
-  }
-
-  renderTasks();
-
   // ===== CONTACT PAGE - Form Validation =====
   const form = document.querySelector("form");
   if (form) {
     form.addEventListener("submit", (e) => {
       const firstName = document.getElementById("firstName");
       const lastName = document.getElementById("lastName");
+      const restaurant = document.getElementById("restaurant");
+      const country = document.getElementById("country");
       const email = document.getElementById("email");
       const phone = document.getElementById("phone");
       const message = document.getElementById("message");
 
+      // Helper: stop + show message + focus
+      function showError(msg, field) {
+        e.preventDefault();
+        alert(msg);
+        if (field) field.focus();
+        return false;
+      }
+
       // 1. No field is empty
       if (firstName && firstName.value.trim() === "") {
-        e.preventDefault();
-        alert("Please enter your First Name.");
-        firstName.focus();
-        return;
+        return showError("Please enter your First Name.", firstName);
       }
       if (lastName && lastName.value.trim() === "") {
-        e.preventDefault();
-        alert("Please enter your Last Name.");
-        lastName.focus();
-        return;
+        return showError("Please enter your Last Name.", lastName);
+      }
+      if (restaurant && restaurant.value.trim() === "") {
+        return showError("Please enter your Restaurant Name.", restaurant);
+      }
+      if (country && country.value === "") {
+        return showError(
+          "Please choose your country - USA, UK or Canada.",
+          country,
+        );
       }
       if (email && email.value.trim() === "") {
-        e.preventDefault();
-        alert("Please enter your Email Address.");
-        email.focus();
-        return;
+        return showError("Please enter your Email Address.", email);
       }
       if (phone && phone.value.trim() === "") {
-        e.preventDefault();
-        alert("Please enter your Phone Number.");
-        phone.focus();
-        return;
+        return showError("Please enter your WhatsApp Number.", phone);
       }
       if (message && message.value.trim() === "") {
-        e.preventDefault();
-        alert("Please type your Message.");
-        message.focus();
-        return;
+        return showError(
+          "Please type your message about your restaurant.",
+          message,
+        );
       }
 
       // 2. Email format is valid - must have @ and .
-      if (
-        (email && !email.value.includes("@")) ||
-        (email && !email.value.includes("."))
-      ) {
-        e.preventDefault();
-        alert("Please enter a valid Email Address, e.g. matthew@gmail.com");
-        email.focus();
-        return;
-      }
-
-      // 3. Phone number contains only digits
-      if (phone && !/^[0-9]+$/.test(phone.value.trim())) {
-        e.preventDefault();
-        alert(
-          "Phone Number must contain only digits (0-9), no letters or + - space.",
+      // Better check: something@something.something
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+        return showError(
+          "Please enter a valid Email Address, e.g. john@restaurant.com",
+          email,
         );
-        phone.focus();
-        return;
       }
 
+      // 3. Phone / WhatsApp - allow + , spaces, - , ( ) for USA / UK / Canada
+      // Example: +1 555 123 4567, +44 20 1234 5678
+      // Must have at least 7 digits, max 15 digits
+      if (phone) {
+        const digitsOnly = phone.value.replace(/[^0-9]/g, "");
+        if (
+          !/^[+0-9\s\-()]+$/.test(phone.value.trim()) ||
+          digitsOnly.length < 7 ||
+          digitsOnly.length > 15
+        ) {
+          return showError(
+            "Please enter a valid WhatsApp Number, e.g. +1 555 123 4567",
+            phone,
+          );
+        }
+      }
+
+      // If form is Netlify / normal form, let it submit normally
+      // If you want WhatsApp only, it will still show thank you
       alert(
-        "Thank you " + firstName.value + "! Your message has been received.",
+        "Thank you " +
+          firstName.value.trim() +
+          "! Your message has been received. I will reply within 24 hours.",
       );
+      // Do NOT preventDefault here - let the form submit
     });
   }
 
-  // ===== ABOUT PAGE - Video Play/Pause =====
-  const video = document.querySelector("video");
-  if (video) {
+  // ===== ALL PAGES - Video Play / Pause on click =====
+  // Fixed: now works for ALL videos, not only first one
+  const videos = document.querySelectorAll("video");
+  videos.forEach((video) => {
     video.addEventListener("click", () => {
-      if (video.paused) video.play();
-      else video.pause();
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
     });
+  });
+
+  // ===== FOOTER - Auto Year (optional, no error if no footer year) =====
+  const yearEl = document.getElementById("year");
+  if (yearEl) {
+    yearEl.textContent = new Date().getFullYear();
   }
 });
